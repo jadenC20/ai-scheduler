@@ -1,38 +1,38 @@
 Functional Requirements:
 
-As a group member, I want to receive activity suggestions based on our meeting time, so we don’t have to waste time debating what to do.
+As a surgical coordinator or nurse, I want the system to estimate the return time of equipment based on when it was signed out, so I don't have to guess when it will be available.
 
-If the overlap is at night on a day like Friday, the system suggests “Movies” or “Video Games”
+- If a C-Arm X-ray is signed out at 8:00 AM, the system defaults to an estimated "In Field" duration based on standard procedure times (e.g., 4 hours).
 
-If the overlap is in the afternoon, the system suggests “Study Together” as one of the options.
+- If the equipment is marked as "returned" on the sheet, the system immediately updates its status to "Available."
 
-As a group member, I want to be able to paste my availability in natural language (e.g, I am free Thursday after 3:30 PM), so I don’t have to click boxes manually on a grid. 
 
-Interface provides a text box area for natural language input
+As a hospital staff member, I want to be able to upload a photo of the physical sign-out sheet, so I don't have to manually type in equipment IDs, names, and timestamps into a database.
 
-Users can see a confirmation view of the parsed time before submitting it to the database.
+- The interface provides a mobile-responsive camera/upload zone.
+
+- Users see a confirmation view of the AI-parsed data (Who, What, When, Where) to quickly verify or correct any OCR mistakes before submitting it to the database.
 
 
 Non-Functional Requirements:
 
-Standard API endpoints have to respond in under 200 ms (milliseconds).
+- Standard FastAPI endpoints (fetching the dashboard heatmap, updating basic text fields) must respond in under 200 ms.
 
-Ollama parsing for natural language schedules must be completed in under 5 seconds.
+- Ollama multimodal parsing (extracting handwriting from the image to JSON) must be completed in under 8-10 seconds.
 
-Schedules are stored up until the event planning & day is over, then automatically purged from PostgreSQL.
+- Completed equipment cycles (signed out -> returned) are moved from the "Active" dashboard to an "Archived History" table in PostgreSQL for auditing, rather than being deleted.
 
+AI-Specific Requirements:
 
-AI-specific requirements:
+- If the visual parsing step fails (e.g., the photo is too blurry or handwriting is completely illegible), the interface must gracefully degrade to a manual input form so the user is not blocked from updating the equipment status.
 
-If the natural language parsing step fails, the Interface must degrade to a manual selector for times, so the user is not restricted.
-
-The backend must have a hard timeout of 10 seconds. If Ollama can not return a parsed schedule with that time constraint, it must abort its process and ask the user to input time manually.
+- The backend must have a hard timeout of 15 seconds for the image processing. If the Ollama vision model cannot return a parsed JSON object within that constraint, FastAPI must abort the process and prompt the user to input the data manually.
 
 
 Prioritization:
 
-MUST -> Create a Group, Manual Schedule Input, Algorithm to calculate and display time overlaps
+- MUST -> Mobile "Snap & Sync" image upload UI, Ollama vision extraction (Image-to-JSON), PostgreSQL database integration, and a live "Dashboard" displaying current equipment locations.
 
-SHOULD -> Natural Language Processing with Ollama
+- SHOULD -> Estimated Time of Return (ETA) predictions based on the equipment type, and a "Conflict Alert" if the same machine is signed out to two different rooms simultaneously.
 
-NICE TO HAVE -> AI activity suggestions dependent on time of day, time of year, weather, etc. User Accounts/Authentication
+- NICE TO HAVE -> User Accounts/Authentication (e.g., standard Nurse vs. Admin views), and automated SMS/Dashboard alerts if a piece of equipment has been "In Field" for over 12 hours without a return signature.
