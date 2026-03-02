@@ -17,22 +17,25 @@ graph TD
 ```
     
 
+
 Components Descriptions:
 
 (Frontend) Next.js: 
-Handles user interactions, renders the schedule grids, and will capture the natural language input.
+
+Handles user interactions, renders the real-time equipment availability dashboard, and provides the mobile-responsive camera interface to capture photos of the physical sign-out sheets.
 
 (Backend) FastAPI: 
 
-Connects the user, PostgreSQL database, and Ollama.  
+Serves as the central API gateway. It receives image uploads from the frontend, orchestrates the OCR extraction with Ollama, validates the resulting data, and updates the PostgreSQL database.
 
 (Local AI) Ollama: 
 
-It is utilized for processing natural language input.
+Utilized as a multimodal/vision engine (e.g., running a model like LLaVA) to process images of handwritten logs and extract structured JSON data (Who, What, Where, When).
 
 (Database) PostgreSQL: 
 
-Stores Groups, Stores User Schedules
+Stores the central state of the application, including the Equipment_Status table, Location_Directory, and Checkout_History logs.
+
 
 Data Flow Schematic:
 
@@ -53,27 +56,28 @@ Diagram
     FE-->>U: Shows updated calendar grid
 
 
+
 ADRs (Architectural Decision Records):
 
-ADR 001: Local LLM vs Cloud API
+ADR 001: Local Vision LLM vs Cloud API
 
 Status: Accepted
 
-Context: We need to parse natural language into structured data. Choices are a paid API like OpenAI or a local model like Ollama.
+Context: We need to parse images of handwritten medical logs into structured data. Because these logs exist in a hospital environment and may inadvertently capture sensitive information in the background, sending images to a paid cloud API (like OpenAI) presents budget and potential privacy risks.
 
-Decision: We will utilize Ollama running locally on our machines.
+Decision: We will utilize Ollama running locally to host a multimodal vision model.
 
-Consequences: The LLM used for this project will require sufficient RAM and Storage to run the model.
+Consequences: The LLM used for this project will require a machine with sufficient RAM and VRAM to process images locally within our target response time.
 
 ADR 002: Backend Framework Selection
 
 Status: Accepted
 
-Context: A backend is required to handle API requests and interface with the LLM. Options include Spring Boot, FastAPI, Django, etc.
+Context: A backend is required to handle image file uploads from the client, interface with the local vision LLM, and update the database. Options include Spring Boot, FastAPI, Django, etc.
 
 Decision: FastAPI will be utilized.
 
-Consequences: The team has to understand Python type hinting and Pydantic models.
+Consequences: The team has to understand Python type hinting, handling multipart/form-data for image uploads, and defining Pydantic models to strictly validate the JSON output returning from Ollama.
 
 
 
