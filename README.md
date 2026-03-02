@@ -1,10 +1,11 @@
-# AI-Powered Event Scheduler
+# AI-Powered Medical Asset Tracker
 
 > **Status:** Active Development (MVP Phase)
-> **Goal:** Eliminate the "when are you free?" coordination friction using local AI.
+> **Goal:** Eliminate medical equipment "shadow systems" by digitizing handwritten sign-out logs using local Vision AI.
 
 ## 📖 Overview
-This project is an intelligent scheduling assistant that helps friend groups and student teams find the optimal time to meet. Unlike standard calendars, it allows users to input availability in **natural language** (e.g., *"I'm free after 5pm on Friday"*), which is parsed by a local LLM (Ollama) into structured data.
+This project is an intelligent logistics assistant that helps hospitals and medical facilities track high-value mobile equipment (such as C-arm X-rays and ventilators). Instead of forcing staff to manually type data into a complex system, this app allows users to simply snap a photo of their physical sign-out sheets. The image is parsed by a local multimodal LLM (Ollama) into structured data, instantly updating a real-time hospital equipment dashboard.
+
 
 ### 📚 Documentation
 For detailed engineering documents, please see the `/docs` folder:
@@ -18,10 +19,10 @@ For detailed engineering documents, please see the `/docs` folder:
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js (React) | Responsive web interface for users. |
-| **Backend** | FastAPI (Python) | High-performance API handling logic & AI orchestration. |
-| **AI Engine** | Ollama | Local LLM for privacy-focused Natural Language Processing. |
-| **Database** | PostgreSQL | Relational storage for schedules and groups. |
+| **Frontend** | Next.js (React) | Responsive mobile web interface for camera capture and dashboard viewing. |
+| **Backend** | FastAPI (Python) | High-performance API handling image buffers & AI orchestration. |
+| **AI Engine** | Ollama | Local Vision LLM (e.g., LLaVA) for privacy-focused handwriting extraction (OCR). |
+| **Database** | PostgreSQL | Relational storage for equipment status, locations, and checkout history. |
 
 ---
 
@@ -57,10 +58,10 @@ Follow these instructions to run the project locally.
     pip install -r requirements.txt
     ```
 
-4.  **Prepare the AI Model:**
-    Make sure Ollama is installed, then pull the required model:
+4.  **Prepare the AI Vision Model:**
+    Make sure Ollama is installed, then pull a vision-capable model (like LLaVA) instead of a standard text model:
     ```bash
-    ollama pull llama3.2
+    ollama pull llava
     ```
 
 5.  **Run the Server:**
@@ -77,10 +78,18 @@ Once the backend is running, you can access the interactive Swagger UI to test t
 
 ### Key Endpoints
 * `GET /` - Health check.
-* `POST /parse-schedule` - **AI Feature.** Sends natural language text to Ollama and returns structured JSON.
+* `POST /upload-log` - **AI Feature.** Accepts an image upload (`multipart/form-data`) of a handwritten sign-out sheet, processes it via Ollama's vision model, and returns structured JSON.
 
-**Example Payload:**
+**Expected JSON Response (from Ollama parsing):**
 ```json
 {
-  "schedule_text": "Dinner on Friday at 7pm"
+  "equipment_id": "C-Arm",
+  "user": "Dr. Smith",
+  "location": "OR-3",
+  "time_out": "08:00"
 }
+
+
+
+
+
