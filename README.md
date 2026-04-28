@@ -1,5 +1,6 @@
 # AI-Powered Medical Asset Tracker
 
+> **Role** Front-End Software Engineer
 > **Status:** Active Development (MVP Phase)
 > **Goal:** Eliminate medical equipment "shadow systems" by digitizing handwritten sign-out logs using local Vision AI.
 
